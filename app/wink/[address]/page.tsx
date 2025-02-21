@@ -385,7 +385,7 @@ const SolanaSwapUI: React.FC = () => {
         <div className="min-h-screen bg-black flex items-center justify-center">
           <div className="flex flex-col items-center gap-4">
             <div className="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
-            <p className="text-gray-800 font-medium animate-pulse">Loading...</p>
+            <p className="text-white font-medium animate-pulse">Loading...</p>
           </div>
         </div>
       ) : (
