@@ -15,10 +15,12 @@ import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useWalletClient, useAccount, useBalance } from "wagmi";
 import { parseEther } from "viem";
 import axios from "axios";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { ethers } from "ethers";
 
+
 const SolanaSwapUI: React.FC = () => {
+  
   const [isPageLoading, setIsPageLoading] = useState(true);
 
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
@@ -92,8 +94,11 @@ const SolanaSwapUI: React.FC = () => {
   };
 
   const params = useParams();
-  const destAddress = params.address;
-  console.log("destAddress", destAddress);
+  const fromAddress = params.address;
+  console.log("token1", fromAddress);
+  const searchParams = useSearchParams();
+  const destAddress = searchParams.get('dest');
+  console.log("token2", destAddress);
 
   const handleFromAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;

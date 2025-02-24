@@ -13,19 +13,25 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export async function generateMetadata({ params }) {
-  const url = typeof window !== 'undefined' ? window.location.href : '';
+export async function generateMetadata({ params, searchParams }) {
+  // const url = typeof window !== 'undefined' ? window.location.href : '';
 
 
-  console.log("Current URL:", url);
+  // console.log("Current URL:", url);
   const baseUrl = "https://buymemes.winks.fun";
   const {address} = await params;
+  const { headers } = require('next/headers');
+  const headersList = headers();
+  const referer = headersList.get('referer') || '';
+  const url = new URL(referer);
+  const destAddress = url.searchParams.get('dest');
+
 
   console.log("baseUrl", baseUrl);
   console.log("address", address);
-  console.log("params", address);
+  console.log("destAddress", destAddress);
 
-  const playerUrl = `${baseUrl}/wink/${address}`;
+  const playerUrl = `${baseUrl}/wink/${address}?dest=${destAddress}`;
 
   return {
     title: " Buy memecoins with 1-click from Twitter!",
@@ -52,7 +58,7 @@ export default function AddressLayout({ children }) {
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <Providers>
-          <ReferrerTracker />
+          {/* <ReferrerTracker /> */}
           {children}
         </Providers>
       </body>
