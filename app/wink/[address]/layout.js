@@ -21,8 +21,8 @@ export async function generateMetadata({ params, searchParams }) {
   const baseUrl = "https://buymemes.winks.fun";
   const {address} = await params;
   const { headers } = require('next/headers');
-  const headersList = headers();
-  const referer = await headersList.get('referer') || '';
+  const headersList = await headers();
+  const referer = headersList.get('referer') || '';
   const url = new URL(referer);
   const destAddress = url.searchParams.get('dest');
 
