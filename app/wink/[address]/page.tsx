@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   RefreshCw,
   Wallet,
@@ -46,7 +46,8 @@ const SolanaSwapUI: React.FC = () => {
   const [weiAmount, setWeiAmount] = useState<string>("");
   const [success, setSuccess] = useState<boolean | null>(false);
   const [txnHash, setTxnHash] = useState<string>("");
-
+  const [isProcessing, setIsProcessing] = useState<boolean>(false);
+  const [winkpoints, setWinkpoints] = useState<number | null>(null);
   const [bnbBal, setBnbBal] = useState<string>("");
   const [memeBal, setMemeBal] = useState<string>("");
   const [currentPoints, setCurrentPoints] = useState<any | null>(null);
@@ -99,6 +100,46 @@ const SolanaSwapUI: React.FC = () => {
     const value = e.target.value;
     setFromAmount(value);
   };
+
+  useEffect(() => {
+    if (address) {
+      fetchWinkpoints();
+    }
+  }, [address]);
+
+  const fetchWinkpoints = useCallback(async () => {
+    if (!address) return 0;
+
+    try {
+      setIsProcessing(true);
+      const response = await fetch(
+        `http://localhost:5001/api/action/getPointsBNB?address=${address}`,
+        { method: "GET" }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      console.log("Winkpoints data:", data);
+
+      if (data && data.points !== undefined) {
+        setWinkpoints(data.points);
+        return data.points;
+      } else {
+        console.warn("Invalid data format received:", data);
+        setWinkpoints(0);
+        return 0;
+      }
+    } catch (error) {
+      console.error("Error fetching winkpoints:", error);
+      setWinkpoints(0);
+      return 0;
+    } finally {
+      setIsProcessing(false);
+    }
+  }, [address]);
 
   const result = useBalance({
     address: "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
@@ -200,7 +241,7 @@ const SolanaSwapUI: React.FC = () => {
     setSuccess(true);
     setTxnHash(receipt.transactionHash);
     if (address) {
-      await updatePoints(address);
+      await updatePoints();
     }
   };
 
@@ -219,42 +260,36 @@ const SolanaSwapUI: React.FC = () => {
     }
   }
 
-  const updatePoints = async (walletAddress: string) => {
+  const updatePoints = async () => {
     try {
       const response = await fetch(
-        "https://bnbswapapi.vercel.app/api/points/add",
+        "https://inner-circle-seven.vercel.app/api/action/setPoints",
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ address: walletAddress }),
+          body: JSON.stringify({
+            to: address,
+          }),
         }
       );
+
+      if (!response.ok) {
+        throw new Error("Failed to update points");
+      }
+
       const data = await response.json();
       console.log("Points updated:", data);
-      if (address) {
-        await getPoints(address);
-      }
+
+      setWinkpoints(0);
+      fetchWinkpoints();
     } catch (error) {
       console.error("Error updating points:", error);
     }
   };
 
-  // To display points
-  const getPoints = async (walletAddress: string) => {
-    try {
-      const response = await fetch(
-        `https://bnbswapapi.vercel.app/api/points/${walletAddress}`
-      );
-      const data = await response.json();
-      console.log("Current points:", data.points);
-      setCurrentPoints(data.points);
-      return data.points;
-    } catch (error) {
-      console.error("Error fetching points:", error);
-    }
-  };
+
 
   const { data: bnbBalance } = useBalance({
     address: address, // user's wallet address
@@ -412,7 +447,7 @@ const SolanaSwapUI: React.FC = () => {
                       </span>
                     </div>
                     <span className=" font-bold text-purple-600">
-                      {points || 0}
+                      {winkpoints || 0}
                     </span>
                   </div>
                 )}
@@ -672,14 +707,9 @@ const SolanaSwapUI: React.FC = () => {
                           </h2>
                           <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-3 border border-blue-100/50">
                             <p className="text-gray-700 font-semibold text-lg mb-3">
-                              You earned 10 points!
+                              You have earned 100 winkpoints!
                             </p>
-                            <div className="flex justify-center items-center gap-2 text-sm text-gray-600">
-                              <span>Current Points:</span>
-                              <span className="font-bold text-purple-600 text-lg">
-                                {currentPoints}
-                              </span>
-                            </div>
+                          
                           </div>
                         </div>
 
