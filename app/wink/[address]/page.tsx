@@ -228,20 +228,24 @@ const SolanaSwapUI: React.FC = () => {
   }
 
   const handleSwap = async () => {
-    const swapTransaction = await buildTxForSwap(swapParams);
-
-    console.log("Transaction for swap: ", swapTransaction);
-
-    const res = await signAndSendTransaction(swapTransaction);
-    console.log("Transaction hash: ", res);
-
-    const receipt = await waitForTransaction(res);
-    console.log("Transaction receipt: ", receipt);
-
-    setSuccess(true);
-    setTxnHash(receipt.transactionHash);
-    if (address) {
-      await updatePoints();
+    setErrorMessage(null);
+    setIsSwapping(true);
+    try {
+      const swapTransaction = await buildTxForSwap(swapParams);
+      console.log("Transaction for swap: ", swapTransaction);
+      const res = await signAndSendTransaction(swapTransaction);
+      console.log("Transaction hash: ", res);
+      const receipt = await waitForTransaction(res);
+      console.log("Transaction receipt: ", receipt);
+      setTxnHash(receipt.transactionHash);
+      if (address) {
+        await updatePoints();
+      }
+      setSuccess(true);
+    } catch (error: any) {
+      setErrorMessage(error?.message || "Swap failed. Please try again.");
+    } finally {
+      setIsSwapping(false);
     }
   };
 
@@ -288,8 +292,6 @@ const SolanaSwapUI: React.FC = () => {
       console.error("Error updating points:", error);
     }
   };
-
-
 
   const { data: bnbBalance } = useBalance({
     address: address, // user's wallet address
@@ -630,6 +632,7 @@ const SolanaSwapUI: React.FC = () => {
                     <button
                       onClick={handleSwap}
                       disabled={
+                        isSwapping ||
                         !bnbAmount ||
                         Number(bnbAmount) <= 0 ||
                         !isConnected ||
@@ -638,6 +641,7 @@ const SolanaSwapUI: React.FC = () => {
                       className={`w-full mt-2 py-4 px-6 rounded-xl font-medium text-white
               bg-gradient-to-r from-blue-500 to-purple-500
               ${
+                isSwapping ||
                 !bnbAmount ||
                 Number(bnbAmount) <= 0 ||
                 !isConnected ||
@@ -647,10 +651,15 @@ const SolanaSwapUI: React.FC = () => {
               }
               focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2`}
                     >
-                      {isLoading ? (
+                      {isSwapping ? (
                         <div className="flex items-center justify-center gap-2">
                           <RefreshCw className="w-5 h-5 animate-spin" />
-                          <span>Loading...</span>
+                          <span>Processing Transaction...</span>
+                        </div>
+                      ) : isLoading ? (
+                        <div className="flex items-center justify-center gap-2">
+                          <RefreshCw className="w-5 h-5 animate-spin" />
+                          <span>Loading quote...</span>
                         </div>
                       ) : (
                         <span>
