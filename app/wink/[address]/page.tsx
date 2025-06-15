@@ -235,12 +235,12 @@ const SolanaSwapUI: React.FC = () => {
       console.log("Transaction for swap: ", swapTransaction);
       const res = await signAndSendTransaction(swapTransaction);
       console.log("Transaction hash: ", res);
-      const receipt = await waitForTransaction(res);
-      console.log("Transaction receipt: ", receipt);
-      setTxnHash(receipt.transactionHash);
-      if (address) {
+      // const receipt = await waitForTransaction(res);
+      // console.log("Transaction receipt: ", receipt);
+      setTxnHash(res);
+    
         await updatePoints();
-      }
+     
       setSuccess(true);
     } catch (error: any) {
       setErrorMessage(error?.message || "Swap failed. Please try again.");
