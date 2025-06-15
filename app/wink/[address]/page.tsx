@@ -113,7 +113,7 @@ const SolanaSwapUI: React.FC = () => {
     try {
       setIsProcessing(true);
       const response = await fetch(
-        `https://inner-circle-seven.vercel.app/api/action/getPointsBNB?address=${address}`,
+        `https://inner-circle-r1w2.vercel.app/api/action/getPointsBNB?address=${address}`,
         { method: "GET" }
       );
 
@@ -263,7 +263,7 @@ const SolanaSwapUI: React.FC = () => {
   const updatePoints = async () => {
     try {
       const response = await fetch(
-        "https://inner-circle-seven.vercel.app/api/action/setPointsBNB",
+        "https://inner-circle-r1w2.vercel.app/api/action/setPointsBNB",
         {
           method: "POST",
           headers: {
